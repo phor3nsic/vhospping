@@ -36,7 +36,7 @@ def save(host):
 		HOSTS_FOUND.append(host)
 
 def checkResp(props, host):
-	scs = [200,500,503,401,403]
+	scs = [200,500,503,401,405]
 	sc = props["sc"]
 	cl = props["cl"]
 
@@ -57,18 +57,36 @@ def outputSave(url, output):
 def run(host):
 	checkResp(getProps(req(URL,host)), host)
 
-def main():
-	getFirstReq(URL)
-	print(f"[!] Running on {URL}")
-
+def executor():
 	try:
 		with ThreadPoolExecutor() as t:
 			t.map(run, HOSTS, timeout=3)
 	except KeyboardInterrupt:
 		outputSave(OUTPUT)
 		sys.exit()
+
+def urlListMode():
+	global URL
+
+	for x in URLLIST:
+		URL = x.replace("\n","")
+		getFirstReq(URL)
+		print(f"[!] Running on {URL}")
+		executor()
 	
 	print(f"[!] Finish, total found {str(len(HOSTS_FOUND))}")
+	
+	if len(HOSTS_FOUND) > 0:
+		print(f"[+] Se you results in {OUTPUT}")
+		outputSave(URL, OUTPUT)
+
+
+def normalMode():
+	getFirstReq(URL)
+	print(f"[!] Running on {URL}")
+	executor()
+	print(f"[!] Finish, total found {str(len(HOSTS_FOUND))}")
+	
 	if len(HOSTS_FOUND) > 0:
 		print(f"[+] Se you results in {OUTPUT}")
 		outputSave(URL, OUTPUT)
@@ -84,15 +102,15 @@ if __name__ == '__main__':
 	\u001b[0m"""
 	print(banner)
 	parser = argparse.ArgumentParser(add_help=True)
-	parser.add_argument("-u", "--url", help="Url",required=True)
-	parser.add_argument("-d", "--domain", help="Force Domain for header")
-	parser.add_argument("-w", "--wordlist", help="Wordlist For hosts")
+	parser.add_argument("-u", "--url", help="Url")
+	parser.add_argument("-uL", "--urlList", help="Url list mode")
+	parser.add_argument("-d", "--domain", help="Force domain for header")
+	parser.add_argument("-w", "--wordlist", help="Wordlist for hosts")
 	parser.add_argument("-s","--subdomainsList", help="Use subdomains for brute force")
-	parser.add_argument("-p","--proxy", help="Proxy url for Debug")
+	parser.add_argument("-p","--proxy", help="Proxy url for debug")
 	parser.add_argument("-o", "--output", help="Output for save",required=True)
 	args = parser.parse_args()
 
-	URL = args.url
 	OUTPUT = args.output
 	FIRST_RESPONSE = {}
 	HOSTS_FOUND = []
@@ -114,4 +132,10 @@ if __name__ == '__main__':
 	if args.subdomainsList == None:
 		HOSTS = open(args.wordlist).readlines()
 
-	main()
+	if args.url != None:
+		URL = args.url
+		normalMode()
+
+	if args.urlList != None:
+		URLLIST = open(args.urlList).readlines()
+		urlListMode()
