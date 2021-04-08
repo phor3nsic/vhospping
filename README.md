@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <a href="#"><img src="img/jump.png" width="60px" alt="Nuclei">Vhospping</a>
+  <a href="#"><img src="img/jump.png" width="60px" alt="Vhospping"> | Vhospping</a>
 </h1>
 
 <h4 align="center">Abuse of vhost hopping or proxy pass</h4>
@@ -13,7 +13,7 @@
 ## How it works
 
 <h3 align="center">
-  <img src="img/banner.png" alt="nuclei-flow" width="700px"></a>
+  <img src="img/banner.png" alt="vhospint" width="700px"></a>
 </h3>
 
 ## Install
