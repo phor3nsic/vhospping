@@ -24,7 +24,18 @@ def req(url, host):
 		header["Host"] = host+DOMAIN
 	
 	header["User-Agent"] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:89.0) Gecko/20100101 Firefox/89.0"
-	resp = requests.get(url, headers=header, proxies=PROXY, verify=False)
+	header["Forwarded"] = "127.0.0.1"
+	header["X-Client-IP"] = "127.0.0.1"
+	header["X-Forwarded-By"] = "127.0.0.1"
+	header["X-Forwarded-For"] = "127.0.0.1"
+	header["X-Forwarded-For-IP"] = "127.0.0.1"
+	header["X-Forwarded-Host"] = "127.0.0.1"
+	header["X-Host"] = "127.0.0.1"
+	header["X-Originating-IP"] = "127.0.0.1"
+	header["X-Remote-Addr"] = "127.0.0.1"
+	header["X-Remote-IP"] = "127.0.0.1"
+	header["X-True-IP"] = "127.0.0.1"
+	resp = requests.get(url, headers=header, proxies=PROXY, verify=False, allow_redirects=False)
 	
 	return resp
 
