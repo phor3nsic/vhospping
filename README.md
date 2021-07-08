@@ -8,8 +8,23 @@
 ---
 ## What is this
 
-...
+> Bypass access host with port filtred!
 
+#### With Subdomains:
+1- Enumerate target subdomains
+2- Choose a target URL
+3- Run vhospping using subdomains instead of wordlists:
+```sh
+▶ python3 vhospping.py -u https://example.com -s subdomains.txt -o output.txt
+```
+
+#### With Wordlist:
+1- Choose a target URL
+2- Run vhospping using wordlists:
+
+```sh
+▶ python3 vhospping.py -u https://example.com -w db/wordlist.txt -o output.txt
+``` 
 ## How it works
 
 <h3 align="center">
@@ -20,27 +35,30 @@
 ```sh
 ▶ git clone https://github.com/phor3nsic/vhospping.git
 ```
-### Running
+### Help
 
-Scanning with hosts.
 ```sh
-▶ python3 vhospping.py -u https://example.com -w db/wordlist.txt -o output.txt
+▶ python3 vhospping.py -h
+
+usage: vhospping.py [-h] [-u URL] [-uL URLLIST] [-d DOMAIN] [-w WORDLIST] [-s SUBDOMAINSLIST] [-p PROXY] -o OUTPUT
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -u URL, --url URL     Url
+  -uL URLLIST, --urlList URLLIST
+                        Url list mode
+  -d DOMAIN, --domain DOMAIN
+                        Force domain for header
+  -w WORDLIST, --wordlist WORDLIST
+                        Wordlist for hosts
+  -s SUBDOMAINSLIST, --subdomainsList SUBDOMAINSLIST
+                        Use subdomains for brute force
+  -p PROXY, --proxy PROXY
+                        Proxy url for debug Ex: http://127.0.0.1:8080
+  -o OUTPUT, --output OUTPUT
+                        Output for save
 ``` 
 
-Scanning forcing domain.
-```sh
-▶ python3 vhospping.py -u https://example.com -d example.com -w db/wordlist.txt -o output.txt
-``` 
-
-Scanning with subdomains.
-```sh
-▶ python3 vhospping.py -u https://example.com -s subdomains.txt -o output.txt
-```
-
-Scanning with proxy.
-```sh
-▶ python3 vhospping.py -u https://example.com -w db/wordlist.txt -o output.txt -p http://127.0.0.1:8080
-```
 ### More
 
 > https://mobile.twitter.com/Bugcrowd/status/1372034980164014082/photo/1
