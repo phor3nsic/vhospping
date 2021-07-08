@@ -39,7 +39,7 @@ def req(url, host):
 	
 	return resp
 
-def defult_of_url(url):
+def default_of_url(url):
 	global FIRST_RESPONSE
 
 	resp = req(url, None)
@@ -94,7 +94,7 @@ def url_list_mode():
 
 	for x in URLLIST:
 		URL = x.replace("\n","")
-		defult_of_url(URL)
+		default_of_url(URL)
 		print(f"""
 [!] Running on {URL}
 [i] Normal content-length: {FIRST_RESPONSE}
@@ -111,7 +111,7 @@ def url_list_mode():
 
 def normal_mode():
 
-	defult_of_url(URL)
+	default_of_url(URL)
 	check_error_response(URL)
 
 	print(f"""
