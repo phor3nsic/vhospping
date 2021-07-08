@@ -12,16 +12,16 @@
 
 #### With Subdomains:
 
-1 - Enumerate target subdomains
-2 - Choose a target URL
-3 - Run vhospping using subdomains instead of wordlists:
+- Enumerate target subdomains
+- Choose a target URL
+- Run vhospping using subdomains instead of wordlists:
 ```sh
 ▶ python3 vhospping.py -u https://example.com -s subdomains.txt -o output.txt
 ```
 
 #### With Wordlist:
-1 - Choose a target URL
-2 - Run vhospping using wordlists:
+- Choose a target URL
+- Run vhospping using wordlists:
 
 ```sh
 ▶ python3 vhospping.py -u https://example.com -w db/wordlist.txt -o output.txt
