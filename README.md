@@ -24,12 +24,12 @@
 
 Scanning with hosts.
 ```sh
-▶ python3 vhospping.py -u https://example.com -w wordlist.txt -o output.txt
+▶ python3 vhospping.py -u https://example.com -w db/wordlist.txt -o output.txt
 ``` 
 
 Scanning forcing domain.
 ```sh
-▶ python3 vhospping.py -u https://example.com -d example.com -w wordlist.txt -o output.txt
+▶ python3 vhospping.py -u https://example.com -d example.com -w db/wordlist.txt -o output.txt
 ``` 
 
 Scanning with subdomains.
@@ -39,7 +39,7 @@ Scanning with subdomains.
 
 Scanning with proxy.
 ```sh
-▶ python3 vhospping.py -u https://example.com -w wordlist.txt -o output.txt -p http://127.0.0.1:8080
+▶ python3 vhospping.py -u https://example.com -w db/wordlist.txt -o output.txt -p http://127.0.0.1:8080
 ```
 ### More
 
