@@ -55,7 +55,7 @@ def check_error_response(url):
 
 def get_content_infos(resp):
 	infos = {}
-	infos["content-length"] = resp.headers["content-length"]
+	infos["content-length"] = str(len(resp.content))
 	infos["status"] = str(resp.status_code)
 
 	return infos
