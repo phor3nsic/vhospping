@@ -1,4 +1,3 @@
-from sqlite3 import Timestamp
 import requests
 import sys
 import re
@@ -28,17 +27,6 @@ def req(url, host):
 		header["Host"] = host+DOMAIN
 	
 	header["User-Agent"] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:89.0) Gecko/20100101 Firefox/89.0"
-	header["Forwarded"] = "127.0.0.1"
-	header["X-Client-IP"] = "127.0.0.1"
-	header["X-Forwarded-By"] = "127.0.0.1"
-	header["X-Forwarded-For"] = "127.0.0.1"
-	header["X-Forwarded-For-IP"] = "127.0.0.1"
-	header["X-Forwarded-Host"] = "127.0.0.1"
-	header["X-Host"] = "127.0.0.1"
-	header["X-Originating-IP"] = "127.0.0.1"
-	header["X-Remote-Addr"] = "127.0.0.1"
-	header["X-Remote-IP"] = "127.0.0.1"
-	header["X-True-IP"] = "127.0.0.1"
 	try:
 		resp = requests.get(url, headers=header, proxies=PROXY, verify=False, allow_redirects=False, timeout=5)
 	except:
@@ -97,8 +85,40 @@ def outpout_save(url, output):
 	arq = open(output, "w+")
 	for x in HOSTS_FOUND:
 		x = x.replace("\n","")
-		arq.write(f"[vhospping] [host:{x}] [low] {url}\n")
+		arq.write('{"title":"Vhosping","host":"%s", "url":"%s"}\n' %(x, url))
 	arq.close()
+
+def url_list_mode():
+	global URL
+	global DOMAIN
+
+	for x in URLLIST:
+		URL = x.replace("\n","")
+		if SUDOMAINS_LIST_MODE == True:
+			DOMAIN = ""
+		else:
+			DOMAIN = "."+get_domain(URL)
+		default_of_url(URL)
+		check_error_response(URL)
+		print_msg()
+		executor()
+	
+	finish()
+
+
+def normal_mode():
+
+	default_of_url(URL)
+	check_error_response(URL)
+
+	if SUDOMAINS_LIST_MODE == True:
+		DOMAIN = ""
+	else:
+		DOMAIN = "."+get_domain(URL)
+
+	print_msg()
+	executor()
+	finish()
 
 def run(host):
 	check_response(get_content_infos(req(URL,host)), host)
@@ -111,53 +131,21 @@ def executor():
 		outpout_save(OUTPUT)
 		sys.exit()
 
-def url_list_mode():
-	global URL
-	global DOMAIN
-
-	for x in URLLIST:
-		URL = x.replace("\n","")
-		DOMAIN = "."+get_domain(URL)
-		default_of_url(URL)
-		check_error_response(URL)
-
-		print(f"""
-[!] Running on {URL}
-[i] Normal content-length: {FIRST_RESPONSE}
-[i] Normal Title: {FIRST_TITLE}
-[i] Wild content-length: {WILD_RESPONSE}
-[i] Wild Title: {WILD_TITLE}
-
-""")
-		executor()
-	
+def finish():
 	print(f"\n[!] Finish, total found {str(len(HOSTS_FOUND))}")
-	
 	if len(HOSTS_FOUND) > 0:
 		print(f"[+] Se you results in {OUTPUT}")
 		outpout_save(URL, OUTPUT)
 
 
-def normal_mode():
-
-	default_of_url(URL)
-	check_error_response(URL)
-
+def print_msg():
 	print(f"""
 [!] Running on {URL}
 [i] Normal content-length: {FIRST_RESPONSE}
 [i] Normal Title: {FIRST_TITLE}
 [i] Wild content-length: {WILD_RESPONSE}
 [i] Wild Title: {WILD_TITLE}
-
 """)
-	
-	executor()
-	print(f"\n[!] Finish, total found {str(len(HOSTS_FOUND))}")
-	
-	if len(HOSTS_FOUND) > 0:
-		print(f"[+] Se you results in {OUTPUT}")
-		outpout_save(URL, OUTPUT)
 
 if __name__ == '__main__':
 	
@@ -184,6 +172,7 @@ if __name__ == '__main__':
 	HOSTS_FOUND = []
 	PROXY = None
 	URL = args.url
+	SUDOMAINS_LIST_MODE = False
 
 	if args.proxy:
 		PROXY = {"http":args.proxy,"https":args.proxy}
@@ -191,6 +180,7 @@ if __name__ == '__main__':
 	if args.subdomainsList != None and args.domain == None:
 		DOMAIN = ""
 		HOSTS = open(args.subdomainsList).readlines()
+		SUDOMAINS_LIST_MODE = True
 
 	if args.subdomainsList == None:
 		HOSTS = open(args.wordlist).readlines()
@@ -208,4 +198,3 @@ if __name__ == '__main__':
 	if args.url != None:
 		URL = args.url
 		normal_mode()
-
