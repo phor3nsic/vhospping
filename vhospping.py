@@ -1,17 +1,21 @@
+from sqlite3 import Timestamp
 import requests
 import sys
 import re
 import argparse
 
+from bs4 import BeautifulSoup
 from concurrent.futures import ThreadPoolExecutor
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 FIRST_RESPONSE = None
+FIRST_TITLE = None
 WILD_RESPONSE = None
+WILD_TITLE = None
 
 def get_domain(url):
-	r = '(?<=\\.)[\\w+.]+'
+	r = '(?<=\\.)[\\w+(\\-|).]+'
 	d = re.findall(r, url)
 	
 	return d[0]
@@ -35,37 +39,55 @@ def req(url, host):
 	header["X-Remote-Addr"] = "127.0.0.1"
 	header["X-Remote-IP"] = "127.0.0.1"
 	header["X-True-IP"] = "127.0.0.1"
-	resp = requests.get(url, headers=header, proxies=PROXY, verify=False, allow_redirects=False)
-	
+	try:
+		resp = requests.get(url, headers=header, proxies=PROXY, verify=False, allow_redirects=False, timeout=5)
+	except:
+		resp = None
 	return resp
 
 def default_of_url(url):
 	global FIRST_RESPONSE
+	global FIRST_TITLE
 
 	resp = req(url, None)
 	infos = get_content_infos(resp)
 	FIRST_RESPONSE = infos["content-length"]
+	FIRST_TITLE = infos["title"]
 
 def check_error_response(url):
 	global WILD_RESPONSE
+	global WILD_TITLE
 
 	host = "b25SsZgfsW"
 	infos = get_content_infos(req(url,host))
 	WILD_RESPONSE = infos["content-length"]
+	WILD_TITLE = infos["title"]
 
 def get_content_infos(resp):
 	infos = {}
-	infos["content-length"] = str(len(resp.content))
-	infos["status"] = str(resp.status_code)
+	infos["title"] = None
+	if resp != None:
+		soup = BeautifulSoup(resp.text, 'html.parser')
+		infos["content-length"] = str(len(resp.content))
+		infos["status"] = str(resp.status_code)
+		for htmltitle in soup.find_all('title'):
+				infos["title"] = htmltitle.get_text().replace("\n","")
+		if infos["status"] == 301:
+			infos["title"] = "Redirect"
+	else:
+		infos["content-length"] = None
+		infos["status"] = None
 
+	
 	return infos
-
 
 def check_response(infos, host):
 	host = host.replace("\n","")
-	if infos["content-length"] != FIRST_RESPONSE and infos["content-length"] != WILD_RESPONSE:
-		print(f"[vhospping] [host:{host}] [info] {URL} "+ infos["status"])
-		save(host)
+	if infos["status"] == 409:
+		if infos["content-length"] != FIRST_RESPONSE and infos["content-length"] != WILD_RESPONSE:
+			if infos["title"] != FIRST_TITLE and infos["title"] != WILD_TITLE:
+				print(f'\u001b[33;1m[vhospping] [host:{host}] [info] {URL} {infos["status"]}\u001b[0m')
+				save(host)
 
 def save(host):
 	if host not in HOSTS_FOUND:
@@ -91,14 +113,21 @@ def executor():
 
 def url_list_mode():
 	global URL
+	global DOMAIN
 
 	for x in URLLIST:
 		URL = x.replace("\n","")
+		DOMAIN = "."+get_domain(URL)
 		default_of_url(URL)
+		check_error_response(URL)
+
 		print(f"""
 [!] Running on {URL}
 [i] Normal content-length: {FIRST_RESPONSE}
+[i] Normal Title: {FIRST_TITLE}
 [i] Wild content-length: {WILD_RESPONSE}
+[i] Wild Title: {WILD_TITLE}
+
 """)
 		executor()
 	
@@ -117,7 +146,10 @@ def normal_mode():
 	print(f"""
 [!] Running on {URL}
 [i] Normal content-length: {FIRST_RESPONSE}
+[i] Normal Title: {FIRST_TITLE}
 [i] Wild content-length: {WILD_RESPONSE}
+[i] Wild Title: {WILD_TITLE}
+
 """)
 	
 	executor()
@@ -156,12 +188,6 @@ if __name__ == '__main__':
 	if args.proxy:
 		PROXY = {"http":args.proxy,"https":args.proxy}
 
-	if args.domain == None and args.subdomainsList == None:
-		DOMAIN = "."+get_domain(URL)
-
-	if args.domain != None and args.subdomainsList == None:
-		DOMAIN = "."+args.domain
-
 	if args.subdomainsList != None and args.domain == None:
 		DOMAIN = ""
 		HOSTS = open(args.subdomainsList).readlines()
@@ -169,10 +195,17 @@ if __name__ == '__main__':
 	if args.subdomainsList == None:
 		HOSTS = open(args.wordlist).readlines()
 
+	if args.urlList != None:
+		URLLIST = open(args.urlList).readlines()
+		url_list_mode()
+
+	if args.domain == None and args.subdomainsList == None:
+		DOMAIN = "."+get_domain(URL)
+
+	if args.domain != None and args.subdomainsList == None:
+		DOMAIN = "."+args.domain
+
 	if args.url != None:
 		URL = args.url
 		normal_mode()
 
-	if args.urlList != None:
-		URLLIST = open(args.urlList).readlines()
-		url_list_mode()
